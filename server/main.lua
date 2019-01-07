@@ -1,5 +1,14 @@
 characters = {}
 
+AddEventHandler('es:playerLoaded', function(source)
+	local myID = {
+		steamid = GetPlayerIdentifiers(source)[1],
+		playerid = source
+	}
+
+	TriggerClientEvent('esx_aiomenu:saveID', source, myID)
+end)
+
 function getIdentity(source, callback)
 	local identifier = GetPlayerIdentifiers(source)[1]
 	MySQL.Async.fetchAll("SELECT * FROM `users` WHERE `identifier` = @identifier",
@@ -279,6 +288,25 @@ AddEventHandler('menu:deleteCharacter', function(myIdentifiers)
 			TriggerClientEvent('noIdentity', myIdentifiers.playerid, {})
 		end
 	end)
+end)
+
+RegisterServerEvent('esx_aiomenu:checkKeys')
+AddEventHandler('esx_aiomenu:checkKeys', function(PlayerID, plates, callback)
+	local keyCheck = nil
+	local newPlate = string.lower(plates)
+	TriggerClientEvent("sendProximityMessageID", -1, PlayerID, "Plates Before Export: " .. tostring(newPlate))
+	keyCheck = exports['esx_locksystem']:getKey(PlayerID, newPlate, callback)
+		if keyCheck ~= nil then
+			TriggerClientEvent("sendProximityMessageID", -1, PlayerID, "Result is not nil.")
+			TriggerClientEvent("sendProximityMessageID", -1, PlayerID, "keyCheck = " .. tostring(keyCheck))
+
+			cb = true
+			return cb
+		else
+			TriggerClientEvent("sendProximityMessageID", -1, PlayerID, "Result is nil.")
+			cb = false
+			return cb
+		end
 end)
 
 RegisterServerEvent('InteractSound_SV:PlayOnOne')

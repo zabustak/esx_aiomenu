@@ -43,6 +43,11 @@ Citizen.CreateThread(function()
 	end
 end)
 
+RegisterNetEvent('esx_identity:saveID')
+AddEventHandler('esx_identity:saveID', function(data)
+	myIdentifiers = data
+end)
+
 RegisterNUICallback('NUIFocusOff', function()
 	SetNuiFocus(false, false)
 	SendNUIMessage({type = 'closeAll'})
@@ -117,6 +122,10 @@ function doToggleVehicleLocks()
 			ESX.ShowNotification('You must be the driver of a vehicle to use this.')
 		end
 	elseif vehicle == 0 and lastCar ~= nil then
+		local vehPlate 		= GetVehicleNumberPlateText(lastCar)
+		local myPlayerID 	= myIdentifiers.playerid
+		local keyCheck = checkForKey(myPlayerID, vehPlate, cb)
+
 		if lockStatusOutside == 1 or lockStatusOutside == 7 then
 			local lib = "anim@mp_player_intmenu@key_fob@"
 			local anim = "fob_click"
@@ -151,6 +160,20 @@ function doToggleVehicleLocks()
 	else
 		ESX.ShowNotification('You must be inside of a vehicle to use this.')
 	end
+end
+
+function checkForKey(myPlayerID, vehPlate, callback)
+	local PlayerID 	= myPlayerID
+	local plates = vehPlate
+	ESX.ShowNotification('Server Event Triggered.')
+	TriggerServerEvent("esx_aiomenu:checkKeys", PlayerID, plates, function(callback)
+		if callback ~= nil then
+			ESX.ShowNotification('There is a callback.')
+			ESX.ShowNotification('Callback is ' .. tostring(callback))
+		else
+			ESX.ShowNotification('There is no callback.')
+		end
+	end)
 end
 
 --================================================================================================
